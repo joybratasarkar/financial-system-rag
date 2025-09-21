@@ -69,7 +69,6 @@ temp/
 # Large files
 *.bin
 *.safetensors
-models/
 
 # Docker
 Dockerfile
