@@ -9,7 +9,11 @@ from fastapi.responses import JSONResponse
 
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Add parent directory to path for imports
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 
 from models.schemas import (
     QueryRequest, QueryResponse, DownloadRequest,

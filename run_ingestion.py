@@ -4,10 +4,18 @@ Phase 1: Data Ingestion
 Downloads real SEC 10-K filings and builds vector store
 """
 
+import sys
+import os
+from pathlib import Path
+
+# Add project root to Python path for imports
+project_root = Path(__file__).parent.resolve()
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
 from core.sec_downloader import SECDownloader
 from core.document_processor import DocumentProcessor
 from core.vector_store import FAISSVectorStore
-import os
 import time
 
 
