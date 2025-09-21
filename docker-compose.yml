@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  financial-qa-api:
+    build: .
+    container_name: financial-qa-system
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./xooper.json:/app/xooper.json:ro  # Mount credentials as read-only
+    environment:
+      - PYTHONPATH=/app
+      - UVICORN_HOST=0.0.0.0
+      - UVICORN_PORT=8000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - financial-qa-network
+
+  # Optional: Add a reverse proxy for production
+  nginx:
+    image: nginx:alpine
+    container_name: financial-qa-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro  # SSL certificates
+    depends_on:
+      - financial-qa-api
+    restart: unless-stopped
+    networks:
+      - financial-qa-network
+    profiles:
+      - production
+
+networks:
+  financial-qa-network:
+    driver: bridge
+
+volumes:
+  financial-data:
+    driver: local
