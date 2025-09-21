@@ -7,7 +7,7 @@ services:
     startCommand: python main.py
     envVars:
       - key: PYTHONPATH
-        value: /opt/render/project/src:/opt/render/project/src/api:/opt/render/project/src/core:/opt/render/project/src/models
+        value: /app
       - key: UVICORN_HOST
         value: 0.0.0.0
       - key: UVICORN_PORT
@@ -38,7 +38,7 @@ services:
     startCommand: python run_ingestion.py
     envVars:
       - key: PYTHONPATH
-        value: /opt/render/project/src
+        value: /app
       - key: PYTHONUNBUFFERED
         value: "1"
     disk:
