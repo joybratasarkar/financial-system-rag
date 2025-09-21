@@ -10,12 +10,36 @@ from pathlib import Path
 
 # Add project root to Python path FIRST - before any local imports
 project_root = Path(__file__).parent.resolve()
-sys.path.insert(0, str(project_root))
 
-# Also add absolute paths for all subdirectories
-sys.path.insert(0, str(project_root / "api"))
-sys.path.insert(0, str(project_root / "core"))
-sys.path.insert(0, str(project_root / "models"))
+
+
+# Debug: Print paths for deployment troubleshooting
+print(f"DEBUG: Project root: {project_root}")
+print(f"DEBUG: Current working dir: {os.getcwd()}")
+print(f"DEBUG: __file__: {__file__}")
+print(f"DEBUG: sys.path before: {sys.path[:3]}")
+
+# Add comprehensive paths for deployment compatibility
+paths_to_add = [
+    str(project_root),
+    str(project_root / "api"),
+    str(project_root / "core"),
+    str(project_root / "models"),
+    "/app",  # Render deployment path
+    "/app/api",
+    "/app/core",
+    "/app/models",
+    os.getcwd(),  # Current working directory
+    os.path.join(os.getcwd(), "api"),
+    os.path.join(os.getcwd(), "core"),
+    os.path.join(os.getcwd(), "models")
+]
+
+for path in paths_to_add:
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+print(f"DEBUG: sys.path after: {sys.path[:8]}")
 
 import uvicorn
 from fastapi import FastAPI

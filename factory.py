@@ -14,10 +14,25 @@ load_dotenv()
 # ----------------------------------------------------------------
 # Global/Environment Config (adjust as needed or use .env files)
 # ----------------------------------------------------------------
-SERVICE_ACCOUNT_KEY = os.path.abspath("xooper.json")
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_KEY
-PROJECT_ID = "xooper-450012"
-LOCATION = "us-central1"
+
+# For local development, use xooper.json if it exists
+# For Render deployment with Secret Files, check /etc/secrets/xooper.json
+# For other deployments, use environment variables
+if os.path.exists("xooper.json"):
+    SERVICE_ACCOUNT_KEY = os.path.abspath("xooper.json")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_KEY
+    print("DEBUG: Using local xooper.json for credentials")
+elif os.path.exists("/etc/secrets/xooper.json"):
+    # Render Secret Files mount location
+    SERVICE_ACCOUNT_KEY = "/etc/secrets/xooper.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = SERVICE_ACCOUNT_KEY
+    print("DEBUG: Using Render Secret File for credentials")
+else:
+    print("DEBUG: Using environment variables for credentials (deployment mode)")
+    # In deployment, GOOGLE_APPLICATION_CREDENTIALS should be set via environment
+
+PROJECT_ID = os.getenv("GOOGLE_CLOUD_PROJECT", "xooper-450012")
+LOCATION = os.getenv("GOOGLE_CLOUD_LOCATION", "us-central1")
 
 
 
