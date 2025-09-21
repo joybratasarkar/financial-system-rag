@@ -7,6 +7,10 @@ from typing import Dict, List
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from models.schemas import (
     QueryRequest, QueryResponse, DownloadRequest,
     ProcessingStatus, DocumentMetadata

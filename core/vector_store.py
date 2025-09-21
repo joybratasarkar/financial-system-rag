@@ -7,9 +7,15 @@ import numpy as np
 import faiss
 import pickle
 import json
+import sys
+import os
 from typing import List, Dict, Tuple, Optional
 from pathlib import Path
 from sentence_transformers import SentenceTransformer
+
+# Add project root to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from models.schemas import DocumentChunk, Source
 from factory import get_embedding_model
 

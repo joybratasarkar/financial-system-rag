@@ -6,11 +6,16 @@ Handles PDF text extraction, chunking, and metadata preservation
 import os
 import re
 import hashlib
+import sys
 from typing import List, Dict, Optional, Tuple
 from pathlib import Path
 import PyPDF2
 import pdfplumber
 from bs4 import BeautifulSoup
+
+# Add project root to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from models.schemas import DocumentChunk, DocumentMetadata
 
 
