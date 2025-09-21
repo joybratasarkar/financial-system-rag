@@ -1,13 +1,10 @@
 services:
   - type: web
     name: financial-qa-agent-system
-    runtime: python3
+    env: python
     plan: starter
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-    startCommand: |
-      python main.py
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
     envVars:
       - key: PYTHONPATH
         value: /opt/render/project/src
@@ -16,9 +13,9 @@ services:
       - key: UVICORN_PORT
         value: 10000
       - key: PYTHONUNBUFFERED
-        value: 1
+        value: "1"
       - key: PYTHONDONTWRITEBYTECODE
-        value: 1
+        value: "1"
     disk:
       name: financial-qa-data
       mountPath: /opt/render/project/src/data
@@ -28,18 +25,15 @@ services:
   # Optional: Background worker for data ingestion
   - type: worker
     name: financial-qa-ingestion-worker
-    runtime: python3
+    env: python
     plan: starter
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
-    startCommand: |
-      python run_ingestion.py
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run_ingestion.py
     envVars:
       - key: PYTHONPATH
         value: /opt/render/project/src
       - key: PYTHONUNBUFFERED
-        value: 1
+        value: "1"
     disk:
       name: financial-qa-data
       mountPath: /opt/render/project/src/data

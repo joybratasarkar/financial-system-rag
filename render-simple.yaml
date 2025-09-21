@@ -1,9 +1,8 @@
 services:
   - type: web
     name: financial-qa-system
-    runtime: python3
+    env: python
     plan: starter
-    repo: https://github.com/yourusername/financial-qa-agent-system
     buildCommand: pip install -r requirements.txt
     startCommand: python main.py
     envVars:
