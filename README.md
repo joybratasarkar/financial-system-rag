@@ -90,6 +90,65 @@ docker-compose --profile production up -d --build
 - **Volumes**: Persistent data storage
 - **Networks**: Isolated container networking
 
+## Cloud Deployment ☁️
+
+### Render.com (One-Click Deploy)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/yourusername/financial-qa-agent-system)
+
+**Option 1: Infrastructure as Code**
+```bash
+# Deploy using render.yaml
+render deploy --file render.yaml
+
+# Simple deployment
+render deploy --file render-simple.yaml
+```
+
+**Option 2: Manual Setup**
+1. Connect your GitHub repository to Render
+2. Create a new Web Service
+3. Use these settings:
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `python main.py`
+   - **Port**: `10000`
+   - **Health Check**: `/api/v1/health`
+   - **Disk**: Mount 1GB disk at `/opt/render/project/src/data`
+
+**Environment Variables:**
+```
+UVICORN_HOST=0.0.0.0
+UVICORN_PORT=10000
+PYTHONPATH=/opt/render/project/src
+```
+
+### Other Cloud Platforms
+
+**Heroku**
+```bash
+# Add Procfile
+echo "web: python main.py" > Procfile
+git add . && git commit -m "Add Procfile"
+heroku create financial-qa-system
+git push heroku main
+```
+
+**Railway**
+```bash
+# Railway automatically detects Python and requirements.txt
+railway login
+railway init
+railway up
+```
+
+**Google Cloud Run**
+```bash
+# Build and deploy container
+gcloud run deploy financial-qa-system \
+  --source . \
+  --port 8000 \
+  --allow-unauthenticated
+```
+
 ## Assignment Compliance ✅
 
 ### All 5 Required Query Types Working (100%)

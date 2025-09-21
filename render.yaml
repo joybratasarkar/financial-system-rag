@@ -1,0 +1,53 @@
+services:
+  - type: web
+    name: financial-qa-agent-system
+    runtime: python3
+    plan: starter
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: |
+      python main.py
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: UVICORN_HOST
+        value: 0.0.0.0
+      - key: UVICORN_PORT
+        value: 10000
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: PYTHONDONTWRITEBYTECODE
+        value: 1
+    disk:
+      name: financial-qa-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    healthCheckPath: /api/v1/health
+
+  # Optional: Background worker for data ingestion
+  - type: worker
+    name: financial-qa-ingestion-worker
+    runtime: python3
+    plan: starter
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: |
+      python run_ingestion.py
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: PYTHONUNBUFFERED
+        value: 1
+    disk:
+      name: financial-qa-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
+    # Run once to populate data, then can be disabled
+    autoDeploy: false
+
+databases:
+  # Optional: Redis for caching (if needed)
+  - name: financial-qa-cache
+    plan: starter
