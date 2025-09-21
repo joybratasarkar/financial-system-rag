@@ -5,15 +5,23 @@ Main FastAPI application entry point
 """
 
 import sys
+import os
 from pathlib import Path
 
 # Add project root to Python path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-import uvicorn
-from fastapi import FastAPI
-from api.routes import router
+try:
+    import uvicorn
+    from fastapi import FastAPI
+    from api.routes import router
+except ImportError as e:
+    print(f"Import error: {e}")
+    print(f"Python path: {sys.path}")
+    print(f"Current directory: {os.getcwd()}")
+    print(f"Files in current directory: {os.listdir('.')}")
+    raise
 
 app = FastAPI(
     title="Financial Q&A System",
@@ -32,4 +40,6 @@ async def root():
     }
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=False)

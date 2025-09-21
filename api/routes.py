@@ -8,19 +8,30 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 
 import sys
+import os
 from pathlib import Path
 
 # Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
-from models.schemas import (
-    QueryRequest, QueryResponse, DownloadRequest,
-    ProcessingStatus, DocumentMetadata
-)
-from core.sec_downloader import SECDownloader
-from core.document_processor import DocumentProcessor
-from core.vector_store import FAISSVectorStore
-from core.financial_agent import FinancialAgent
+try:
+    from models.schemas import (
+        QueryRequest, QueryResponse, DownloadRequest,
+        ProcessingStatus, DocumentMetadata
+    )
+    from core.sec_downloader import SECDownloader
+    from core.document_processor import DocumentProcessor
+    from core.vector_store import FAISSVectorStore
+    from core.financial_agent import FinancialAgent
+except ImportError as e:
+    print(f"Import error in routes.py: {e}")
+    print(f"Python path: {sys.path}")
+    print(f"Current directory: {os.getcwd()}")
+    print(f"Project root: {project_root}")
+    if project_root.exists():
+        print(f"Files in project root: {list(project_root.iterdir())}")
+    raise
 
 router = APIRouter()
 
