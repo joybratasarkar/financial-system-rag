@@ -8,12 +8,10 @@ from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import JSONResponse
 
 import sys
-import os
+from pathlib import Path
 
-# Add parent directory to path for imports
-parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from models.schemas import (
     QueryRequest, QueryResponse, DownloadRequest,

@@ -14,7 +14,7 @@ import pdfplumber
 from bs4 import BeautifulSoup
 
 # Add project root to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from models.schemas import DocumentChunk, DocumentMetadata
 

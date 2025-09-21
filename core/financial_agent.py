@@ -6,10 +6,11 @@ Handles query decomposition, multi-step retrieval, and result synthesis
 import json
 import sys
 import os
+from pathlib import Path
 from typing import List, Dict, Any, Optional, TypedDict
 
 # Add project root to path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langgraph.graph import StateGraph, END
