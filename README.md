@@ -18,19 +18,44 @@ A focused RAG system with agent capabilities that answers both simple and compar
 pip install -r requirements.txt
 ```
 
-### 2. Data Ingestion (Phase 1)
+### 2. AI Model Configuration
+
+**Option A: Google Vertex AI (Default - Recommended)**
+- Place your Google Cloud service account JSON file as `xooper.json` in the project root
+- The system uses Google's Vertex AI (Gemini 2.0 Flash Lite) by default
+- No additional setup needed if you have the JSON file
+
+**Option B: OpenAI**
+```bash
+# Set your OpenAI API key
+export OPENAI_API_KEY="your-openai-api-key-here"
+
+# Modify factory.py to use OpenAI instead of Vertex AI
+# Replace get_vertex_ai_llm() calls with OpenAI client
+```
+
+**Option C: Anthropic Claude**
+```bash
+# Set your Anthropic API key
+export ANTHROPIC_API_KEY="your-anthropic-api-key-here"
+
+# Modify factory.py to use Anthropic client
+# Replace get_vertex_ai_llm() calls with Claude client
+```
+
+### 3. Data Ingestion (Phase 1)
 ```bash
 python run_ingestion.py
 ```
 This downloads real SEC 10-K filings and builds the vector store (~2-3 minutes).
 
-### 3. Start the API Server (Phase 2)
+### 4. Start the API Server (Phase 2)
 ```bash
 python main.py
 ```
 Server runs on http://localhost:8000
 
-### 4. Test the System
+### 5. Test the System
 Access the interactive API docs at: http://localhost:8000/docs
 
 Or test via command line:
@@ -43,9 +68,80 @@ print(response.json()['answer'])
 "
 ```
 
-## Docker Deployment 🐳
+## Configuration Details
 
-### Option 1: Docker Compose (Recommended)
+### AI Model Setup
+
+**Current Configuration:**
+- **Default Model**: Google Vertex AI (Gemini 2.0 Flash Lite)
+- **Configuration File**: `factory.py`
+- **Credentials**: `xooper.json` (Google Cloud service account)
+
+**To Use Different AI Models:**
+
+1. **OpenAI Integration:**
+```python
+# In factory.py, replace get_vertex_ai_llm() with:
+from langchain_openai import ChatOpenAI
+
+def get_openai_llm(temperature: float = 0.7):
+    return ChatOpenAI(
+        model="gpt-4o-mini",  # or gpt-4, gpt-3.5-turbo
+        temperature=temperature,
+        api_key=os.getenv("OPENAI_API_KEY")
+    )
+```
+
+2. **Anthropic Claude Integration:**
+```python
+# In factory.py, replace get_vertex_ai_llm() with:
+from langchain_anthropic import ChatAnthropic
+
+def get_claude_llm(temperature: float = 0.7):
+    return ChatAnthropic(
+        model="claude-3-5-sonnet-20241022",  # or claude-3-haiku
+        temperature=temperature,
+        api_key=os.getenv("ANTHROPIC_API_KEY")
+    )
+```
+
+3. **Update imports in `core/financial_agent.py`:**
+```python
+# Replace:
+from factory import get_vertex_ai_llm
+self.llm = get_vertex_ai_llm(temperature=0.3)
+
+# With your chosen model:
+from factory import get_openai_llm  # or get_claude_llm
+self.llm = get_openai_llm(temperature=0.3)  # or get_claude_llm
+```
+
+### Required Dependencies
+
+Add to `requirements.txt` for different models:
+```bash
+# For OpenAI
+langchain-openai>=0.1.0
+
+# For Anthropic Claude
+langchain-anthropic>=0.1.0
+
+# For Google Vertex AI (current default)
+langchain-google-vertexai>=1.0.0
+```
+
+## Docker Setup (Optional) 🐳
+
+### Build and Run with Docker
+```bash
+# Build the image
+docker build -t financial-qa-system .
+
+# Run the container
+docker run -p 8000:8000 -v $(pwd)/data:/app/data financial-qa-system
+```
+
+### Docker Compose
 ```bash
 # Build and run the complete stack
 docker-compose up --build
@@ -53,100 +149,8 @@ docker-compose up --build
 # Run in background
 docker-compose up -d --build
 
-# View logs
-docker-compose logs -f
-
 # Stop the stack
 docker-compose down
-```
-
-### Option 2: Docker Only
-```bash
-# Build the image
-docker build -t financial-qa-system .
-
-# Run the container
-docker run -p 8000:8000 -v $(pwd)/data:/app/data financial-qa-system
-
-# Run with credentials (if using Google Cloud)
-docker run -p 8000:8000 \
-  -v $(pwd)/data:/app/data \
-  -v $(pwd)/xooper.json:/app/xooper.json:ro \
-  financial-qa-system
-```
-
-### Production with Nginx (Optional)
-```bash
-# Run with reverse proxy and rate limiting
-docker-compose --profile production up -d --build
-
-# Access via http://localhost (port 80)
-```
-
-### Docker Environment
-- **Base Image**: Python 3.11 slim
-- **Security**: Non-root user, read-only credentials
-- **Health Checks**: Automatic container health monitoring
-- **Volumes**: Persistent data storage
-- **Networks**: Isolated container networking
-
-## Cloud Deployment ☁️
-
-### Render.com (One-Click Deploy)
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/yourusername/financial-qa-agent-system)
-
-**Option 1: Infrastructure as Code**
-```bash
-# Deploy using render.yaml
-render deploy --file render.yaml
-
-# Simple deployment
-render deploy --file render-simple.yaml
-```
-
-**Option 2: Manual Setup**
-1. Connect your GitHub repository to Render
-2. Create a new Web Service
-3. Use these settings:
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `python main.py`
-   - **Port**: `10000`
-   - **Health Check**: `/api/v1/health`
-   - **Disk**: Mount 1GB disk at `/opt/render/project/src/data`
-
-**Environment Variables:**
-```
-UVICORN_HOST=0.0.0.0
-UVICORN_PORT=10000
-PYTHONPATH=/opt/render/project/src
-```
-
-### Other Cloud Platforms
-
-**Heroku**
-```bash
-# Add Procfile
-echo "web: python main.py" > Procfile
-git add . && git commit -m "Add Procfile"
-heroku create financial-qa-system
-git push heroku main
-```
-
-**Railway**
-```bash
-# Railway automatically detects Python and requirements.txt
-railway login
-railway init
-railway up
-```
-
-**Google Cloud Run**
-```bash
-# Build and deploy container
-gcloud run deploy financial-qa-system \
-  --source . \
-  --port 8000 \
-  --allow-unauthenticated
 ```
 
 ## Assignment Compliance ✅
@@ -169,6 +173,112 @@ gcloud run deploy financial-qa-system \
 - ✅ **Automated SEC Downloader** (+5%): Real-time SEC EDGAR API integration
 - ✅ **Production API** (+5%): FastAPI with comprehensive endpoints and documentation
 - ✅ **Advanced Agent Patterns** (+5%): LangGraph state machine for complex reasoning
+
+## Project Structure & Architecture
+
+### Folder Structure
+```
+financial-qa-system/
+├── 📁 api/                          # FastAPI REST endpoints
+│   ├── __init__.py
+│   └── routes.py                    # API routes for queries, health, stats
+├── 📁 core/                         # Core business logic
+│   ├── __init__.py
+│   ├── document_processor.py        # Text extraction & chunking
+│   ├── financial_agent.py           # LangGraph agent orchestration
+│   ├── sec_downloader.py           # SEC EDGAR API integration
+│   └── vector_store.py             # FAISS vector search
+├── 📁 models/                       # Data models & schemas
+│   ├── __init__.py
+│   └── schemas.py                  # Pydantic models for API
+├── 📁 data/                        # Data storage
+│   ├── __init__.py
+│   ├── filings/                    # Downloaded SEC 10-K files
+│   └── vector_index/               # FAISS index files
+├── 📁 myenv/                       # Virtual environment
+├── main.py                         # FastAPI application entry point
+├── factory.py                      # LLM & resource factory
+├── run_ingestion.py               # Data ingestion script
+├── xooper.json                    # Google Cloud credentials
+├── requirements.txt               # Python dependencies
+├── docker-compose.yml             # Docker orchestration
+├── Dockerfile                     # Container definition
+└── README.md                      # Documentation
+```
+
+### Data Flow & Component Connections
+
+```mermaid
+graph TD
+    A[User Query] --> B[FastAPI Routes]
+    B --> C[Financial Agent]
+    C --> D[Query Classification]
+
+    D --> E{Simple or Complex?}
+    E -->|Simple| F[Vector Search]
+    E -->|Complex| G[Query Decomposition]
+
+    G --> H[Sub-queries]
+    H --> F[Vector Search]
+    F --> I[FAISS Index]
+
+    I --> J[Retrieved Chunks]
+    J --> K[LLM Synthesis]
+    K --> L[Structured Response]
+    L --> B
+    B --> M[JSON API Response]
+
+    N[SEC Downloader] --> O[Raw 10-K Files]
+    O --> P[Document Processor]
+    P --> Q[Text Chunks]
+    Q --> R[Embeddings]
+    R --> I
+```
+
+### Component Interactions
+
+**1. Data Ingestion Flow:**
+```
+run_ingestion.py → SEC Downloader → Document Processor → Vector Store → FAISS Index
+```
+
+**2. Query Processing Flow:**
+```
+main.py → API Routes → Financial Agent → Vector Store → LLM → Response
+```
+
+**3. Key Connections:**
+
+- **`main.py`** → Entry point, imports `api.routes`
+- **`api/routes.py`** → Imports from `core/` and `models/`, uses `factory.py`
+- **`factory.py`** → Creates LLM instances, manages `xooper.json` credentials
+- **`core/financial_agent.py`** → Orchestrates LangGraph workflow, uses Vector Store
+- **`core/vector_store.py`** → Manages FAISS index, handles similarity search
+- **`core/document_processor.py`** → Processes SEC filings into chunks
+- **`core/sec_downloader.py`** → Downloads real SEC data via EDGAR API
+- **`models/schemas.py`** → Defines Pydantic models for API requests/responses
+
+### Architecture Patterns
+
+**1. Factory Pattern (`factory.py`):**
+- Centralized resource creation (LLM, embeddings)
+- Environment-aware configuration
+- Credential management
+
+**2. Agent Pattern (`financial_agent.py`):**
+- LangGraph state machine
+- Query decomposition and routing
+- Multi-step reasoning workflow
+
+**3. Repository Pattern (`vector_store.py`):**
+- Abstracted data access
+- FAISS index management
+- Similarity search operations
+
+**4. Service Layer (`core/`):**
+- Business logic separation
+- Modular component design
+- Clean dependency injection
 
 ## Technical Architecture
 

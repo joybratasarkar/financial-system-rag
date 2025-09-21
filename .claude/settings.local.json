@@ -3,7 +3,9 @@
     "allow": [
       "Bash(git init:*)",
       "WebSearch",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(rm:*)",
+      "Bash(tree:*)"
     ],
     "deny": [],
     "ask": []
