@@ -7,7 +7,7 @@ services:
     startCommand: python main.py
     envVars:
       - key: PYTHONPATH
-        value: /opt/render/project/src
+        value: /opt/render/project/src:/opt/render/project/src/api:/opt/render/project/src/core:/opt/render/project/src/models
       - key: UVICORN_HOST
         value: 0.0.0.0
       - key: UVICORN_PORT

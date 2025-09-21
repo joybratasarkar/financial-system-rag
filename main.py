@@ -5,11 +5,17 @@ Main FastAPI application entry point
 """
 
 import sys
+import os
 from pathlib import Path
 
-# Add project root to Python path
-project_root = Path(__file__).parent
+# Add project root to Python path FIRST - before any local imports
+project_root = Path(__file__).parent.resolve()
 sys.path.insert(0, str(project_root))
+
+# Also add absolute paths for all subdirectories
+sys.path.insert(0, str(project_root / "api"))
+sys.path.insert(0, str(project_root / "core"))
+sys.path.insert(0, str(project_root / "models"))
 
 import uvicorn
 from fastapi import FastAPI
