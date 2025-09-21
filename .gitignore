@@ -173,7 +173,6 @@ temp/
 # Large model files
 *.bin
 *.safetensors
-models/
 
 # Jupyter notebook outputs
 *.ipynb
