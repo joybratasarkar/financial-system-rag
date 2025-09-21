@@ -169,10 +169,6 @@ docker-compose down
 - ✅ **Output Format**: JSON responses with proper source attribution
 - ✅ **Real Data**: 703 vectors from 8 actual SEC 10-K filings (GOOGL, MSFT, NVDA 2022-2024)
 
-### Bonus Features ✅
-- ✅ **Automated SEC Downloader** (+5%): Real-time SEC EDGAR API integration
-- ✅ **Production API** (+5%): FastAPI with comprehensive endpoints and documentation
-- ✅ **Advanced Agent Patterns** (+5%): LangGraph state machine for complex reasoning
 
 ## Project Structure & Architecture
 
